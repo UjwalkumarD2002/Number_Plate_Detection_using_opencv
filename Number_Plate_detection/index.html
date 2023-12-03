@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Plate Detection</title>
+</head>
+<body>
+    <h1>Number Plate Detection</h1>
+    
+    <input type="file" accept="image/*" id="imageInput">
+    <button onclick="detectPlate()">Detect Number Plate</button>
+
+    <img id="outputImage" style="display: none;">
+    <p id="outputText"></p>
+
+    <script>
+        function detectPlate() {
+            var input = document.getElementById('imageInput');
+            var file = input.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var image = document.getElementById('outputImage');
+                    image.src = e.target.result;
+                    image.style.display = 'block';
+
+                    // Send the image data to the backend for processing
+                    fetch('/detect', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'image=' + encodeURIComponent(e.target.result),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('outputText').innerText = data.result;
+                    })
+                    .catch(error => console.error('Error:', error));
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>
